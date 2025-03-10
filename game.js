@@ -7,6 +7,10 @@ const Gameboard = (() => {
         boardHTML += `<div class="square" id="square-${index}">${square}</div>`
     })
     document.querySelector("#gameboard").innerHTML = boardHTML;
+    const squares = document.querySelectorAll(".square");
+    squares.forEach((square) => {
+      square.addEventListener("click", Game.handleClick);
+    })
   }
 
   const update = (index, value) => {
@@ -14,9 +18,12 @@ const Gameboard = (() => {
     render();
   }
 
+  const getGameboard = () => gameboard;
+
   return {
     render,
-    update
+    update,
+    getGameboard
   }
 })();
 
@@ -30,12 +37,12 @@ const createPlayer = (name, mark) => {
 const Game = (() => {
   let players = [];
   let currentPlayerIndex;
-  let gameOver = false;
+  let gameOver;
 
   const start = () => {
     players = [
       createPlayer(document.querySelector("#player1").value, "X"),
-      createPlayer(document.querySelector("#player1").value, "0")
+      createPlayer(document.querySelector("#player2").value, "O")
     ]
     currentPlayerIndex = 0;
     gameOver = false;
@@ -48,13 +55,30 @@ const Game = (() => {
 
   const handleClick = (event) => {
     let index = parseInt(event.target.id.split("-")[1]);
-    Gameboard.update(index, players[currentPlayerIndex].mark)
+    if (Gameboard.getGameboard() [index] !== "")
+      return;
+    Gameboard.update(index, players[currentPlayerIndex].mark);
+    currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
   }
+
+  const restart = () => {
+    for (let i = 0; i < 9; i++) {
+      Gameboard.update(i, "");
+    }
+    Gameboard.render();
+  }
+
   return {
     start,
+    restart,
     handleClick
   }
 })();
+
+const restartButton = document.querySelector("#restart-button");
+restartButton.addEventListener("click", () => {
+  Game.restart();
+})
 
 const startButton = document.querySelector("#start-button");
 startButton.addEventListener("click", () => {
